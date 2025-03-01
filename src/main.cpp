@@ -15,7 +15,7 @@
 #define TOUCH_PIN 32
 #define TOUCH_THRESHOLD 30 // Adjust based on your ESP32 board
 
-const float FLOWRATE = 27.625; // Experimentally measured flowrate (mL per ms)
+const float FLOWRATE = 27.620; // Experimentally measured flowrate (mL per ms)
 bool deviceState = false;
 bool dispensing = false;
 unsigned long dispenseStartTime = 0;
