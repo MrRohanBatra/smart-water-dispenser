@@ -46,7 +46,7 @@ This project is a **Smart Water Dispenser** using an **ESP32** microcontroller. 
 ## Installation & Setup
 ### 1. Clone Repository
 ```sh
-git clone https://github.com/your-repo/smart-water-dispenser.git
+git clone https://github.com/MrRohanBatra/smart-water-dispenser.git
 cd smart-water-dispenser
 ```
 ### 2. Install Dependencies
