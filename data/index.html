@@ -195,7 +195,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="600">
+    <meta http-equiv="refresh" content="600" />
     <title>ESP32 Water Dispenser</title>
     <style>
       body {
@@ -315,9 +315,9 @@
   </head>
   <body>
     <button class="toggle-btn" onclick="toggleDarkMode()">🌙</button>
-    
+
     <div class="info">
-      <span id="time">Loading time...</span> | 
+      <span id="time">Loading time...</span> |
       <span id="weather">Loading weather...</span>
     </div>
 
@@ -345,8 +345,12 @@
     <script>
       function toggleDarkMode() {
         document.body.classList.toggle("dark-mode");
-        localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-        document.querySelector(".toggle-btn").textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+        localStorage.setItem(
+          "darkMode",
+          document.body.classList.contains("dark-mode")
+        );
+        document.querySelector(".toggle-btn").textContent =
+          document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
       }
 
       if (localStorage.getItem("darkMode") === "true") {
@@ -358,7 +362,9 @@
         try {
           let response = await fetch("/state");
           let data = await response.json();
-          document.getElementById("status").textContent = data.state ? "ON" : "OFF";
+          document.getElementById("status").textContent = data.state
+            ? "ON"
+            : "OFF";
         } catch (error) {
           console.error("Error fetching status:", error);
         }
@@ -367,7 +373,8 @@
       async function dispense() {
         let volume = document.getElementById("volume").value;
         if (volume > 0 && volume <= 1000) {
-          document.getElementById("progressBarContainer").style.display = "block";
+          document.getElementById("progressBarContainer").style.display =
+            "block";
           let progress = document.getElementById("progress");
           progress.style.width = "0%";
 
@@ -383,7 +390,8 @@
             if (i >= steps) {
               clearInterval(interval);
               setTimeout(() => {
-                document.getElementById("progressBarContainer").style.display = "none";
+                document.getElementById("progressBarContainer").style.display =
+                  "none";
                 progress.style.width = "0%";
               }, 500);
             }
@@ -407,7 +415,9 @@
         let ampm = hours >= 12 ? "PM" : "AM";
         hours = hours % 12 || 12;
         minutes = minutes < 10 ? "0" + minutes : minutes;
-        document.getElementById("time").textContent = `Time: ${hours}:${minutes} ${ampm}`;
+        document.getElementById(
+          "time"
+        ).textContent = `Time: ${hours}:${minutes} ${ampm}`;
       }
 
       async function updateWeather() {
@@ -416,11 +426,18 @@
           let text = await response.text();
           document.getElementById("weather").innerHTML = `Weather: ${text}`;
         } catch (error) {
-          document.getElementById("weather").textContent = "Weather unavailable";
+          document.getElementById("weather").textContent =
+            "Weather unavailable";
           console.error("Error fetching weather:", error);
         }
       }
-
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch((err) => {
+            console.error("Fullscreen error:", err);
+          });
+        }
+      });
       setInterval(updateStatus, 2000);
       setInterval(updateTime, 1000);
       setInterval(updateWeather, 60000);
