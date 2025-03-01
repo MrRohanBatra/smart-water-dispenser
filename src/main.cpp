@@ -60,7 +60,9 @@ void handleDispense() {
         server.send(400, "text/plain", "Invalid amount (1-1000 mL allowed)");
         return;
     }
-    ml+=ml/4;
+    if(ml<=100){
+        ml+=ml/4;
+    }
     dispenseWater(ml);
     device.sendPowerStateEvent(false, "Dispensing complete");
     deviceState = false;
