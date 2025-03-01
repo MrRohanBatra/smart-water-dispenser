@@ -6,15 +6,15 @@
 #include <SinricProSwitch.h>
 #include <FS.h>
 #include <SPIFFS.h>
-#include "ESP32OTAHelper.h"  // Include OTA Helper
+#include "ESP32OTAHelper.h"
 #include<SemVer.h>
 
-#define FIRMWARE_VERSION "1.1.2"  // Define firmware version
+#define FIRMWARE_VERSION "1.1.3"
 
 #define en 13
 #define in1 12
 #define in2 14
-#define ledPin 2  
+#define ledPin 2 
 #define tpin 32
 
 float flowrate = 11.05*2.5;
@@ -60,7 +60,7 @@ void handleDispense() {
         server.send(400, "text/plain", "Invalid amount (1-1000 mL allowed)");
         return;
     }
-
+    ml+=ml/4;
     dispenseWater(ml);
     device.sendPowerStateEvent(false, "Dispensing complete");
     deviceState = false;
@@ -70,8 +70,20 @@ void handleDispense() {
 void handleState() {
     server.send(200, "application/json", String("{\"state\":") + (deviceState ? "true" : "false") + "}");
 }
-
-// Serve index.html from SPIFFS
+void handlefile(String filename) {
+    File file = SPIFFS.open(("/" + filename).c_str(), "r");
+    if (!file) {
+        server.send(404, "text/plain", "File not found");
+        return;
+    }
+    
+    String contentType = "text/plain";
+    if (filename.endsWith(".css")) contentType = "text/css";
+    else if (filename.endsWith(".js")) contentType = "application/javascript";
+    
+    server.streamFile(file, contentType);
+    file.close();
+}
 void handleRoot() {
     File file = SPIFFS.open("/index.html", "r");
     if (!file) {
@@ -82,7 +94,6 @@ void handleRoot() {
     file.close();
 }
 
-// OTA Update Handler
 bool handleOTAUpdate(const String& url, int major, int minor, int patch, bool forceUpdate) {
     Version currentVersion  = Version(FIRMWARE_VERSION);
     Version newVersion      = Version(String(major) + "." + String(minor) + "." + String(patch));
@@ -115,15 +126,14 @@ bool handleOTAUpdate(const String& url, int major, int minor, int patch, bool fo
 
 void setup() {
     Serial.begin(115200);
-
-    // Initialize SPIFFS
+    pinMode(27,OUTPUT);
+    digitalWrite(27,LOW);
     if (!SPIFFS.begin(true)) {
         Serial.println("SPIFFS initialization failed!");
     } else {
         Serial.println("SPIFFS initialized.");
     }
 
-    // WiFi Connection
     WiFi.begin("Rohan", "vikki08494");
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print("....");
@@ -131,25 +141,23 @@ void setup() {
     }
     Serial.printf("\nWiFi connected at: %s\n", WiFi.localIP().toString().c_str());
 
-    // Start mDNS
     if (!MDNS.begin("esp32")) {
         Serial.println("MDNS initialization failed!");
     } else {
         Serial.println("MDNS started with hostname 'esp32'");
     }
 
-    // Web Server Routes
     server.on("/", HTTP_GET, handleRoot);
+    server.on("/style.css", HTTP_GET, []() { handlefile("style.css"); });
+    server.on("/script.js", HTTP_GET, []() { handlefile("script.js"); });
     server.on("/dispense", HTTP_GET, handleDispense);
     server.on("/state", HTTP_GET, handleState);
     server.begin();
 
-    // Initialize SinricPro
     SinricPro.begin("964a1c01-01b6-4ecf-b76d-bbcc243efb7a", "41f135cb-1954-497c-90dc-d49356b7b239-0ea77ef7-0bfa-4567-abe5-39a5df6de03c");
     device.onPowerState(onPowerState);
-    SinricPro.onOTAUpdate(handleOTAUpdate);  // Enable OTA updates
+    SinricPro.onOTAUpdate(handleOTAUpdate);
 
-    // Set up pins
     int pins[] = {en, in1, in2, ledPin};
     for (int pin : pins) {
         pinMode(pin, OUTPUT);
