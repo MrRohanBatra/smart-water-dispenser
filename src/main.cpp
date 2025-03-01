@@ -59,23 +59,38 @@ bool onPowerState(const String &deviceId, bool &state) {
 }
 
 void handleDispense() {
-    if (!server.hasArg("ml")) {
-        server.send(400, "text/plain", "Missing 'ml' parameter");
+    if (server.method() != HTTP_POST) {
+        server.send(405, "text/plain", "Method Not Allowed");
         return;
     }
 
-    int ml = server.arg("ml").toInt();
+    if (!server.hasArg("plain")) {
+        server.send(400, "text/plain", "Missing JSON body");
+        return;
+    }
+
+    String body = server.arg("plain");
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, body);
+    if (error) {
+        server.send(400, "text/plain", "Invalid JSON");
+        return;
+    }
+
+    int ml = doc["ml"];
     if (ml < 1 || ml > 1000) {
         server.send(400, "text/plain", "Invalid amount (1-1000 mL allowed)");
         return;
     }
+    
     if (ml <= 100) {
-        ml += ml / 4;
+        ml += ml / 4;  // Adjust for small values
     }
 
     startDispense(ml);
     server.send(200, "application/json", "{\"state\":true}");
 }
+
 
 void handleState() {
     server.send(200, "application/json", String("{\"state\":") + (deviceState ? "true" : "false") + "}");
@@ -140,9 +155,9 @@ void setup() {
         ESP.restart();
     }
     ElegantOTA.begin(&server);
-    server.on("/", HTTP_GET, handleRoot);
-    server.on("/dispense", HTTP_GET, handleDispense);
-    server.on("/state", HTTP_GET, handleState);
+    server.on("/", HTTP_POST, handleRoot);
+    server.on("/dispense", HTTP_POST, handleDispense);
+    server.on("/state", HTTP_POST, handleState);
     server.begin();
 
     SinricPro.begin("964a1c01-01b6-4ecf-b76d-bbcc243efb7a", "41f135cb-1954-497c-90dc-d49356b7b239-0ea77ef7-0bfa-4567-abe5-39a5df6de03c");
