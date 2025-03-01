@@ -70,7 +70,7 @@ void handleDispense() {
     }
 
     String body = server.arg("plain");
-    DynamicJsonDocument doc(1024);
+    DynamicJsonDocument doc(1024*2);
     DeserializationError error = deserializeJson(doc, body);
     if (error) {
         server.send(400, "text/plain", "Invalid JSON");
@@ -111,6 +111,7 @@ void reconnectWiFi() {
 
 void handleRoot() {
     if (!SPIFFS.begin(true)) {
+        SPIFFS.format();
         Serial.println("SPIFFS initialization failed!");
         server.send(500, "text/plain", "SPIFFS Error");
         return;
@@ -118,7 +119,8 @@ void handleRoot() {
 
     File f = SPIFFS.open("/index.html", "r");
     if (!f) {
-        server.send(404, "text/plain", "File not found");
+        // server.send(404, "text/plain", "File not found");
+        server.send(200,"text/html","error in openong file");
         return;
     }
 
@@ -154,10 +156,11 @@ void setup() {
         Serial.println("MDNS initialization failed! Restarting ESP32...");
         ESP.restart();
     }
-    ElegantOTA.begin(&server);
-    server.on("/", HTTP_POST, handleRoot);
+    server.on("/", HTTP_GET, handleRoot);
     server.on("/dispense", HTTP_POST, handleDispense);
-    server.on("/state", HTTP_POST, handleState);
+    server.on("/state", HTTP_GET, handleState);
+    ElegantOTA.begin(&server);
+
     server.begin();
 
     SinricPro.begin("964a1c01-01b6-4ecf-b76d-bbcc243efb7a", "41f135cb-1954-497c-90dc-d49356b7b239-0ea77ef7-0bfa-4567-abe5-39a5df6de03c");
@@ -177,7 +180,9 @@ void setup() {
 void loop() {
     SinricPro.handle();
     server.handleClient();
-    reconnectWiFi();
+    if(WiFi.status()!=WL_CONNECTED){
+        reconnectWiFi();
+    }
 
     if (dispensing && (millis() - dispenseStartTime >= dispenseDuration)) {
         stopDispense();
@@ -192,4 +197,5 @@ void loop() {
             startDispense(200);
         }
     }
+    delay(50);
 }

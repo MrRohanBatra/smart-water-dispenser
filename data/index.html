@@ -150,8 +150,10 @@
         document.body.classList.toggle("dark-mode");
         let isDarkMode = document.body.classList.contains("dark-mode");
         localStorage.setItem("darkMode", isDarkMode);
-        document.getElementById("darkModeToggle").textContent = isDarkMode ? "☀️" : "🌙";
-        
+        document.getElementById("darkModeToggle").textContent = isDarkMode
+          ? "☀️"
+          : "🌙";
+
         // Enter fullscreen mode only when toggling dark mode
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch((err) => {
@@ -165,13 +167,17 @@
         document.getElementById("darkModeToggle").textContent = "☀️";
       }
 
-      document.getElementById("darkModeToggle").addEventListener("click", toggleDarkMode);
+      document
+        .getElementById("darkModeToggle")
+        .addEventListener("click", toggleDarkMode);
 
       async function updateStatus() {
         try {
           let response = await fetch("/state");
           let data = await response.json();
-          document.getElementById("status").textContent = data.state ? "ON" : "OFF";
+          document.getElementById("status").textContent = data.state
+            ? "ON"
+            : "OFF";
         } catch (error) {
           console.error("Error fetching status:", error);
         }
@@ -180,7 +186,8 @@
       async function dispense() {
         let volume = document.getElementById("volume").value;
         if (volume > 0 && volume <= 1000) {
-          document.getElementById("progressBarContainer").style.display = "block";
+          document.getElementById("progressBarContainer").style.display =
+            "block";
           let progress = document.getElementById("progress");
           progress.style.width = "0%";
 
@@ -196,13 +203,33 @@
             if (i >= steps) {
               clearInterval(interval);
               setTimeout(() => {
-                document.getElementById("progressBarContainer").style.display = "none";
+                document.getElementById("progressBarContainer").style.display =
+                  "none";
                 progress.style.width = "0%";
               }, 500);
             }
           }, 100);
 
-          await fetch(`/dispense?ml=${volume}`);
+          try {
+            let response = await fetch("/dispense", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ ml: volume }),
+            });
+
+            let data = await response.json();
+            if (data.state) {
+              document.getElementById("status").textContent = "Dispensing...";
+            } else {
+              alert("Dispensing failed: " + data.error);
+            }
+          } catch (error) {
+            console.error("Error dispensing water:", error);
+            alert("Error connecting to the dispenser.");
+          }
+
           updateStatus();
         } else {
           alert("Enter a valid amount (1-1000mL)");
@@ -220,7 +247,9 @@
         let ampm = hours >= 12 ? "PM" : "AM";
         hours = hours % 12 || 12;
         minutes = minutes < 10 ? "0" + minutes : minutes;
-        document.getElementById("time").textContent = `Time: ${hours}:${minutes} ${ampm}`;
+        document.getElementById(
+          "time"
+        ).textContent = `Time: ${hours}:${minutes} ${ampm}`;
       }
 
       async function updateWeather() {
@@ -229,7 +258,8 @@
           let text = await response.text();
           document.getElementById("weather").innerHTML = `Weather: ${text}`;
         } catch (error) {
-          document.getElementById("weather").textContent = "Weather unavailable";
+          document.getElementById("weather").textContent =
+            "Weather unavailable";
           console.error("Error fetching weather:", error);
         }
       }
@@ -240,6 +270,24 @@
       updateStatus();
       updateTime();
       updateWeather();
+      document.addEventListener(
+        "click",
+        () => {
+          let elem = document.documentElement;
+          if (!document.fullscreenElement) {
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+              elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+              elem.msRequestFullscreen();
+            }
+          }
+        },
+        { once: true }
+      );
     </script>
   </body>
 </html>
