@@ -141,9 +141,13 @@
       }
 
       async function updateStatus() {
-        let response = await fetch("/state");
-        let data = await response.json();
-        document.getElementById("status").textContent = data.state ? "ON" : "OFF";
+        try {
+          let response = await fetch("/state");
+          let data = await response.json();
+          document.getElementById("status").textContent = data.state ? "ON" : "OFF";
+        } catch (error) {
+          console.error("Error fetching status:", error);
+        }
       }
 
       async function dispense() {
