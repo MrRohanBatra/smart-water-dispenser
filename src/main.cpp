@@ -13,9 +13,9 @@
 #define IN2 14
 #define LED_PIN 2
 #define TOUCH_PIN 32
-#define TOUCH_THRESHOLD 30 // Adjust based on your ESP32 board
+#define TOUCH_THRESHOLD 30 
 
-const float FLOWRATE = 27.610; // Experimentally measured flowrate (mL per ms)
+const float FLOWRATE = 27.608; 
 bool deviceState = false;
 bool dispensing = false;
 unsigned long dispenseStartTime = 0;
@@ -23,7 +23,8 @@ int dispenseDuration = 0;
 
 WebServer server(80);
 SinricProSwitch &device = SinricPro["67befdd1c8ff9665569cc54f"];
-OTAUpdate ota("http://192.168.29.126");
+OTAUpdate ota("https://github.com/MrRohanBatra/ota-server/releases/download/smart-water-dispenser");
+
 void startDispense(int ml) {
     Serial.printf("Starting to dispense %d mL...\n", ml);
     dispensing = true;
@@ -70,7 +71,7 @@ void handleDispense() {
     }
 
     String body = server.arg("plain");
-    DynamicJsonDocument doc(1024*2);
+    StaticJsonDocument<1024*2> doc;
     DeserializationError error = deserializeJson(doc, body);
     if (error) {
         server.send(400, "text/plain", "Invalid JSON");
