@@ -6,8 +6,8 @@
 #include <SinricProSwitch.h>
 #include <FS.h>
 #include <SPIFFS.h>
-#include"ElegantOTA.h"
-
+#include<OTAUpdate.h>
+OTAUpdate ota("http://192.168.29.126");
 #define EN 13
 #define IN1 12
 #define IN2 14
@@ -15,7 +15,7 @@
 #define TOUCH_PIN 32
 #define TOUCH_THRESHOLD 30 // Adjust based on your ESP32 board
 
-const float FLOWRATE = 27.620; // Experimentally measured flowrate (mL per ms)
+const float FLOWRATE = 27.610; // Experimentally measured flowrate (mL per ms)
 bool deviceState = false;
 bool dispensing = false;
 unsigned long dispenseStartTime = 0;
@@ -130,6 +130,7 @@ void handleRoot() {
 }
 
 void setup() {
+    ota.setFirmwareVersion(3,0,0);
     Serial.begin(115200);
     pinMode(27, OUTPUT);
     digitalWrite(27, LOW);
@@ -141,6 +142,7 @@ void setup() {
 
     Serial.println("Connecting to WiFi...");
     WiFi.begin("Rohan", "vikki08494");
+    ota.begin();
     unsigned long startAttemptTime = millis();
     while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
         Serial.print(".");
@@ -159,7 +161,6 @@ void setup() {
     server.on("/", HTTP_GET, handleRoot);
     server.on("/dispense", HTTP_POST, handleDispense);
     server.on("/state", HTTP_GET, handleState);
-    ElegantOTA.begin(&server);
 
     server.begin();
 
@@ -176,7 +177,7 @@ void setup() {
     ledcAttachPin(EN, 0);
     Serial.println("Setup complete.");
 }
-
+unsigned long long int lastcheckedforupdate=millis();
 void loop() {
     SinricPro.handle();
     server.handleClient();
@@ -197,5 +198,7 @@ void loop() {
             startDispense(200);
         }
     }
-    delay(50);
+    if(millis()-lastcheckedforupdate==(1000*60*10)){
+        ota.checkForUpdates();
+    }
 }
