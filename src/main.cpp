@@ -7,7 +7,7 @@
 #include <FS.h>
 #include <SPIFFS.h>
 #include<OTAUpdate.h>
-OTAUpdate ota("http://192.168.29.126");
+
 #define EN 13
 #define IN1 12
 #define IN2 14
@@ -23,7 +23,7 @@ int dispenseDuration = 0;
 
 WebServer server(80);
 SinricProSwitch &device = SinricPro["67befdd1c8ff9665569cc54f"];
-
+OTAUpdate ota("http://192.168.29.126");
 void startDispense(int ml) {
     Serial.printf("Starting to dispense %d mL...\n", ml);
     dispensing = true;
@@ -142,7 +142,7 @@ void setup() {
 
     Serial.println("Connecting to WiFi...");
     WiFi.begin("Rohan", "vikki08494");
-    ota.begin();
+    
     unsigned long startAttemptTime = millis();
     while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
         Serial.print(".");
@@ -153,6 +153,7 @@ void setup() {
         ESP.restart();
     }
     Serial.printf("\nWiFi connected at: %s\n", WiFi.localIP().toString().c_str());
+    ota.begin();
 
     if (!MDNS.begin("esp32")) {
         Serial.println("MDNS initialization failed! Restarting ESP32...");
