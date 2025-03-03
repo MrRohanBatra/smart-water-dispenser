@@ -23,7 +23,7 @@ int dispenseDuration = 0;
 
 WebServer server(80);
 SinricProSwitch &device = SinricPro["67befdd1c8ff9665569cc54f"];
-OTAUpdate ota("https://ota-server.netlify.app/smart-water-dipenser");
+OTAUpdate ota("http://192.168.29.126:80/smart-water-dispenser");
 void startDispense(int ml)
 {
     Serial.printf("Starting to dispense %d mL...\n", ml);
@@ -150,7 +150,7 @@ void handleRoot()
 
 void setup()
 {
-    ota.setFirmwareVersion(3, 0, 0);
+    ota.setFirmwareVersion(5, 0, 0);
     Serial.begin(115200);
     pinMode(27, OUTPUT);
     digitalWrite(27, LOW);
@@ -186,7 +186,7 @@ void setup()
     server.on("/", HTTP_GET, handleRoot);
     server.on("/dispense", HTTP_POST, handleDispense);
     server.on("/state", HTTP_GET, handleState);
-
+    ota.setupManualOTA(server);
     server.begin();
 
     SinricPro.begin("964a1c01-01b6-4ecf-b76d-bbcc243efb7a", "41f135cb-1954-497c-90dc-d49356b7b239-0ea77ef7-0bfa-4567-abe5-39a5df6de03c");
