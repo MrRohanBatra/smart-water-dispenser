@@ -23,8 +23,7 @@ int dispenseDuration = 0;
 
 WebServer server(80);
 SinricProSwitch &device = SinricPro["67befdd1c8ff9665569cc54f"];
-OTAUpdate ota("https://github.com/MrRohanBatra/ota-server/releases/download/smart-water-dispenser");
-
+OTAUpdate ota("https://ota-server.netlify.app/smart-water-dipenser");
 void startDispense(int ml) {
     Serial.printf("Starting to dispense %d mL...\n", ml);
     dispensing = true;
