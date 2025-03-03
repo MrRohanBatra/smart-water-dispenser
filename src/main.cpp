@@ -150,7 +150,7 @@ void handleRoot()
 
 void setup()
 {
-    ota.setFirmwareVersion(5, 0, 0);
+    ota.setFirmwareVersion(4, 0, 0);
     Serial.begin(115200);
     pinMode(27, OUTPUT);
     digitalWrite(27, LOW);
