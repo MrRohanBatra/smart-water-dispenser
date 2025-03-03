@@ -88,7 +88,7 @@ void handleDispense()
         return;
     }
 
-    int ml = doc["ml"];
+    int ml = doc["ml"] || server.arg("testml");
     if (ml < 1 || ml > 1000)
     {
         server.send(400, "text/plain", "Invalid amount (1-1000 mL allowed)");
@@ -185,6 +185,13 @@ void setup()
     }
     server.on("/", HTTP_GET, handleRoot);
     server.on("/dispense", HTTP_POST, handleDispense);
+    server.on("/dispense",HTTP_GET,[](){
+        if(server.hasArg("testml")){
+            int ml=server.arg("testml").toInt();
+            startDispense(ml);
+            server.send(200, "text/plain", "ok");
+        }
+    });
     server.on("/state", HTTP_GET, handleState);
     ota.setupManualOTA(server);
     server.begin();
