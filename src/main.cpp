@@ -175,6 +175,63 @@ String server_url="https://esp32ota-a74c8.web.app/smart-water-dispenser";
 WebServer server(80);
 SinricProSwitch &device = SinricPro["67befdd1c8ff9665569cc54f"];
 OTAUpdate ota(server_url);
+const uint8_t waterDrop1[] PROGMEM = { 0x00, 0x18, 0x3C, 0x3C, 0x18, 0x00 };  // Small drop
+const uint8_t waterDrop2[] PROGMEM = { 0x00, 0x00, 0x18, 0x3C, 0x3C, 0x18 };  // Falling drop
+const uint8_t waterDrop3[] PROGMEM = { 0x18, 0x3C, 0x7E, 0x7E, 0x3C, 0x18 };  // Big drop
+
+void drawWave(int y) {
+    for (int x = 0; x < SCREEN_WIDTH; x += 10) {
+        int waveHeight = 3 * sin((x + millis() / 10.0) * 0.2);
+        display.drawPixel(x, y + waveHeight, WHITE);
+        display.drawPixel(x + 1, y + waveHeight - 1, WHITE);
+    }
+}
+
+void bootAnimation() {
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    
+    // Scroll effect
+    for (int x = -80; x <= 10; x += 3) {
+        display.clearDisplay();
+        display.setCursor(x, 20);
+        display.print("Smart");
+        display.setCursor(x + 70, 20);
+        display.print("💧"); // Water drop
+        display.setCursor(x + 90, 20);
+        display.print("Dispenser");
+        drawWave(50);  // Dynamic wave effect
+        display.display();
+        delay(40);
+    }
+
+    // Water droplet effect
+    for (int i = 0; i < 3; i++) {
+        display.clearDisplay();
+        display.setCursor(10, 20);
+        display.print("Smart");
+        display.drawBitmap(85, 20, (i % 2 == 0) ? waterDrop1 : waterDrop2, 6, 6, WHITE);
+        display.setCursor(90, 20);
+        display.print("Dispenser");
+        drawWave(50);
+        display.display();
+        delay(200);
+    }
+
+    // Final glow effect
+    for (int i = 0; i < 3; i++) {
+        display.clearDisplay();
+        display.setCursor(10, 20);
+        display.setTextSize(2 + i % 2);  // Pulsating effect
+        display.print("Smart💧Dispenser");
+        drawWave(50);
+        display.display();
+        delay(150);
+    }
+
+    delay(1000);
+}
 void displayLog(const String &message)
 {
     display.clearDisplay();
@@ -426,7 +483,6 @@ void updateDisplayUI()
     display.setCursor(0, 50);
     display.print("WiFi: ");
     display.print(WiFi.status() == WL_CONNECTED ? WiFi.localIP().toString().c_str() : "Disconnected");
-
     display.display();
 }
 void playloader(int loops){
@@ -462,7 +518,8 @@ void setup()
         ESP.restart();
     }
     // playloader(2);
-    playAnimation();
+    // playAnimation();
+    bootAnimation();
     Serial.println("Connecting to WiFi...");
     WiFi.begin(SSID, PASS);
 
