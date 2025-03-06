@@ -23,7 +23,9 @@ Adafruit_SSD1306 display(128, 64, &Wire, -1);
 #define LED_PIN 2
 #define TOUCH_PIN 32
 #define TOUCH_THRESHOLD 30
-
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET    -1
 #define FRAME_DELAY (42)
 #define FRAME_WIDTH (64)
 #define FRAME_HEIGHT (64)
@@ -62,6 +64,7 @@ const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 19800;
 const int daylightOffset_sec = 0;
 int dispenseml;
+void settleLetters();
 void setupTime()
 {
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
@@ -87,6 +90,80 @@ String getCurrentTime()
     strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
     return String(timeStr);
 }
+
+struct Letter {
+    char letter;
+    int x, y;
+    int dx, dy;
+  };
+  
+  Letter letters[] = {
+    {'A', 10, 20, 2, 2},
+    {'-', 40, 30, -2, 1},
+    {'2', 70, 10, 1, -2},
+    {'0', 100, 40, -1, -1},
+    {'4', 55, 25, 1, -1}
+  };
+  
+  int numLetters = sizeof(letters) / sizeof(letters[0]);
+  
+  void playAnimation() {
+    bool settled = false;
+    int frameCount = 0;
+    
+    while (!settled) {
+      display.clearDisplay();
+      
+      for (int i = 0; i < numLetters; i++) {
+        letters[i].x += letters[i].dx;
+        letters[i].y += letters[i].dy;
+        
+        if (letters[i].x < 0 || letters[i].x > SCREEN_WIDTH - 10) letters[i].dx *= -1;
+        if (letters[i].y < 0 || letters[i].y > SCREEN_HEIGHT - 10) letters[i].dy *= -1;
+      }
+      
+      for (int i = 0; i < numLetters; i++) {
+        display.setTextSize(2);
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(letters[i].x, letters[i].y);
+        display.print(letters[i].letter);
+      }
+      
+      display.display();
+      delay(100);
+  
+      frameCount++;
+      if (frameCount > 100) {
+        settled = true;
+      }
+    }
+    
+    settleLetters();
+  }
+  
+  void settleLetters() {
+    letters[0] = {'A', 10, 20, 0, 0};
+    letters[1] = {'-', 40, 20, 0, 0};
+    letters[2] = {'2', 70, 20, 0, 0};
+    letters[3] = {'0', 100, 20, 0, 0};
+    letters[4] = {'4', 55, 20, 0, 0};
+    
+    display.clearDisplay();
+    for (int i = 0; i < numLetters; i++) {
+      display.setTextSize(2);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(letters[i].x, letters[i].y);
+      display.print(letters[i].letter);
+    }
+    
+    // Display "VPRD" below
+    display.setTextSize(1);
+    display.setCursor(50, 50);
+    display.print("VPRD");
+    
+    display.display();
+  }
+  
 float FLOWRATE = 27.608;
 bool deviceState = false;
 bool dispensing = false;
@@ -224,7 +301,7 @@ bool onPowerState(const String &deviceId, bool &state)
 
     if (state)
     {
-        startDispense(200);
+        startDispense(100);
     }
 
     return true;
@@ -364,10 +441,11 @@ for (int i = 0; i < loops; i++) {
 }
 void setup()
 {
-    display.invertDisplay(true);
+    display.setRotation(2);
+    // display.display();
     Wire.begin(16, 4);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(7, 0, 2);
+    ota.setFirmwareVersion(7, 0, 4);
     Serial.begin(115200);
     // bt.begin(115200);
     pinMode(27, OUTPUT);
@@ -383,7 +461,8 @@ void setup()
         Serial.println("SPIFFS initialization failed! Restarting ESP32...");
         ESP.restart();
     }
-    playloader(2);
+    // playloader(2);
+    playAnimation();
     Serial.println("Connecting to WiFi...");
     WiFi.begin(SSID, PASS);
 
@@ -433,6 +512,8 @@ void setup()
 }
 unsigned long long int lastcheckedforupdate = millis();
 static unsigned long lastUIUpdate = 0;
+static unsigned long lastDISUpdate = 0;
+
 void loop()
 {
     SinricPro.handle();
@@ -456,7 +537,7 @@ void loop()
             Serial.print(touchRead(TOUCH_PIN));
             Serial.println("Touch detected, dispensing...");
             device.sendPowerStateEvent(true, "Touch triggered");
-            startDispense(200);
+            startDispense(100);
         }
     }
     if (millis() - lastcheckedforupdate >= (1000 * 60 * 10))
@@ -470,4 +551,7 @@ void loop()
         updateDisplayUI();
     }
     handleSerial();
+    if(millis()-lastDISUpdate>=(1000*60*60)){
+        ESP.restart();
+    }
 }
