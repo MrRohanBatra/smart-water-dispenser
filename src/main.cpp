@@ -94,7 +94,7 @@ unsigned long dispenseStartTime = 0;
 int dispenseDuration = 0;
 String SSID="Rohan";
 String PASS="vikki08494";
-String server_url="http://192.168.29.126:80/smart-water-dispenser";
+String server_url="https://esp32ota-a74c8.web.app/smart-water-dispenser";
 WebServer server(80);
 SinricProSwitch &device = SinricPro["67befdd1c8ff9665569cc54f"];
 OTAUpdate ota(server_url);
@@ -366,7 +366,7 @@ void setup()
 {
     Wire.begin(16, 15);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(5, 0, 0);
+    ota.setFirmwareVersion(7, 0, 1);
     Serial.begin(115200);
     // bt.begin(115200);
     pinMode(27, OUTPUT);
@@ -468,4 +468,5 @@ void loop()
         lastUIUpdate = millis();
         updateDisplayUI();
     }
+    handleSerial();
 }
