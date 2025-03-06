@@ -25,7 +25,7 @@ Adafruit_SSD1306 display(128, 64, &Wire, -1);
 #define TOUCH_THRESHOLD 30
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define OLED_RESET    -1
+#define OLED_RESET -1
 #define FRAME_DELAY (42)
 #define FRAME_WIDTH (64)
 #define FRAME_HEIGHT (64)
@@ -91,155 +91,99 @@ String getCurrentTime()
     return String(timeStr);
 }
 
-struct Letter {
+struct Letter
+{
     char letter;
     int x, y;
     int dx, dy;
-  };
-  
-  Letter letters[] = {
+};
+
+Letter letters[] = {
     {'A', 10, 20, 2, 2},
     {'-', 40, 30, -2, 1},
     {'2', 70, 10, 1, -2},
     {'0', 100, 40, -1, -1},
-    {'4', 55, 25, 1, -1}
-  };
-  
-  int numLetters = sizeof(letters) / sizeof(letters[0]);
-  
-  void playAnimation() {
+    {'4', 55, 25, 1, -1}};
+
+int numLetters = sizeof(letters) / sizeof(letters[0]);
+
+void playAnimation()
+{
     bool settled = false;
     int frameCount = 0;
-    
-    while (!settled) {
-      display.clearDisplay();
-      
-      for (int i = 0; i < numLetters; i++) {
-        letters[i].x += letters[i].dx;
-        letters[i].y += letters[i].dy;
-        
-        if (letters[i].x < 0 || letters[i].x > SCREEN_WIDTH - 10) letters[i].dx *= -1;
-        if (letters[i].y < 0 || letters[i].y > SCREEN_HEIGHT - 10) letters[i].dy *= -1;
-      }
-      
-      for (int i = 0; i < numLetters; i++) {
-        display.setTextSize(2);
-        display.setTextColor(SSD1306_WHITE);
-        display.setCursor(letters[i].x, letters[i].y);
-        display.print(letters[i].letter);
-      }
-      
-      display.display();
-      delay(100);
-  
-      frameCount++;
-      if (frameCount > 100) {
-        settled = true;
-      }
+
+    while (!settled)
+    {
+        display.clearDisplay();
+
+        for (int i = 0; i < numLetters; i++)
+        {
+            letters[i].x += letters[i].dx;
+            letters[i].y += letters[i].dy;
+
+            if (letters[i].x < 0 || letters[i].x > SCREEN_WIDTH - 10)
+                letters[i].dx *= -1;
+            if (letters[i].y < 0 || letters[i].y > SCREEN_HEIGHT - 10)
+                letters[i].dy *= -1;
+        }
+
+        for (int i = 0; i < numLetters; i++)
+        {
+            display.setTextSize(2);
+            display.setTextColor(SSD1306_WHITE);
+            display.setCursor(letters[i].x, letters[i].y);
+            display.print(letters[i].letter);
+        }
+
+        display.display();
+        delay(100);
+
+        frameCount++;
+        if (frameCount > 100)
+        {
+            settled = true;
+        }
     }
-    
+
     settleLetters();
-  }
-  
-  void settleLetters() {
+}
+
+void settleLetters()
+{
     letters[0] = {'A', 10, 20, 0, 0};
     letters[1] = {'-', 40, 20, 0, 0};
     letters[2] = {'2', 70, 20, 0, 0};
     letters[3] = {'0', 100, 20, 0, 0};
     letters[4] = {'4', 55, 20, 0, 0};
-    
+
     display.clearDisplay();
-    for (int i = 0; i < numLetters; i++) {
-      display.setTextSize(2);
-      display.setTextColor(SSD1306_WHITE);
-      display.setCursor(letters[i].x, letters[i].y);
-      display.print(letters[i].letter);
+    for (int i = 0; i < numLetters; i++)
+    {
+        display.setTextSize(2);
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(letters[i].x, letters[i].y);
+        display.print(letters[i].letter);
     }
-    
+
     // Display "VPRD" below
     display.setTextSize(1);
     display.setCursor(50, 50);
     display.print("VPRD");
-    
+
     display.display();
-  }
-  
+}
+
 float FLOWRATE = 27.608;
 bool deviceState = false;
 bool dispensing = false;
 unsigned long dispenseStartTime = 0;
 int dispenseDuration = 0;
-String SSID="Rohan";
-String PASS="vikki08494";
-String server_url="https://esp32ota-a74c8.web.app/smart-water-dispenser";
+String SSID = "Rohan";
+String PASS = "vikki08494";
+String server_url = "https://esp32ota-a74c8.web.app/smart-water-dispenser";
 WebServer server(80);
 SinricProSwitch &device = SinricPro["67befdd1c8ff9665569cc54f"];
-OTAUpdate ota(server_url);// Custom water droplet animation frames (6x8 pixels)
-const uint8_t waterDrop1[] PROGMEM = { 0x00, 0x18, 0x18, 0x3C, 0x3C, 0x3C, 0x18, 0x18 };  
-const uint8_t waterDrop2[] PROGMEM = { 0x18, 0x18, 0x3C, 0x3C, 0x3C, 0x18, 0x18, 0x00 };  
-const uint8_t waterDrop3[] PROGMEM = { 0x00, 0x18, 0x3C, 0x3C, 0x7E, 0x3C, 0x18, 0x00 };  
-
-void drawWave(int y) {
-    for (int x = 0; x < SCREEN_WIDTH; x += 10) {
-        int waveHeight = 3 * sin((x + millis() / 20.0) * 0.2);
-        display.drawPixel(x, y + waveHeight, WHITE);
-        display.drawPixel(x + 1, y + waveHeight - 1, WHITE);
-    }
-}
-
-void bootAnimation() {
-    display.clearDisplay();
-    display.setTextSize(2);
-    display.setTextColor(WHITE);
-
-    // **🔹 Step 1: Long Smooth Scroll Effect**
-    for (int x = -120; x <= 10; x += 2) { 
-        display.clearDisplay();
-        display.setCursor(x, 20);
-        display.print("Smart");
-        display.drawBitmap(x + 75, 22, waterDrop1, 6, 8, WHITE);
-        display.setCursor(x + 90, 20);
-        display.print("Dispenser");
-        drawWave(50);
-        display.display();
-        delay(40);
-    }
-
-    // **🔹 Step 2: Water Droplet Animation**
-    for (int i = 0; i < 5; i++) {
-        display.clearDisplay();
-        display.setCursor(10, 20);
-        display.print("Smart");
-        
-        if (i % 2 == 0) {
-            display.drawBitmap(80, 24, waterDrop1, 6, 8, WHITE);
-        } else {
-            display.drawBitmap(80, 28, waterDrop2, 6, 8, WHITE);
-        }
-
-        display.setCursor(90, 20);
-        display.print("Dispenser");
-        drawWave(50);
-        display.display();
-        delay(200);
-    }
-
-    // **🔹 Step 3: Final Glow & Fade-In Effect**
-    for (int brightness = 1; brightness <= 3; brightness++) {
-        display.clearDisplay();
-        display.setTextSize(2 + (brightness % 2));  
-        display.setCursor(10, 20);
-        display.print("Smart");
-        display.drawBitmap(80, 22, waterDrop3, 6, 8, WHITE);
-        display.setCursor(90, 20);
-        display.print("Dispenser");
-        drawWave(50);
-        display.display();
-        delay(200);
-    }
-
-    delay(1000);  // Hold the final logo
-}
+OTAUpdate ota(server_url);
 void displayLog(const String &message)
 {
     display.clearDisplay();
@@ -249,35 +193,48 @@ void displayLog(const String &message)
     display.println(message);
     display.display();
 }
-void handleSerial() {
-    if (Serial.available()) {
+void handleSerial()
+{
+    if (Serial.available())
+    {
         String command = Serial.readStringUntil('\n'); // Read input until newline
-        command.trim(); // Remove any leading/trailing spaces
+        command.trim();                                // Remove any leading/trailing spaces
 
-        if (command.startsWith("SET URL ")) {
+        if (command.startsWith("SET URL "))
+        {
             server_url = command.substring(8);
             ota.updateurl(server_url);
             Serial.println("Server URL updated to: " + server_url);
-        } else if (command.startsWith("SET SSID ")) {
+        }
+        else if (command.startsWith("SET SSID "))
+        {
             SSID = command.substring(9);
             Serial.println("WiFi SSID updated to: " + SSID);
-        } else if (command.startsWith("SET PASS ")) {
+        }
+        else if (command.startsWith("SET PASS "))
+        {
             PASS = command.substring(9);
             Serial.println("WiFi Password updated.");
-        } else if (command.startsWith("SET FLOW ")) {
-            FLOWRATE= command.substring(9).toFloat();
+        }
+        else if (command.startsWith("SET FLOW "))
+        {
+            FLOWRATE = command.substring(9).toFloat();
             Serial.println("Flow rate updated to: " + String(FLOWRATE));
-        } else if (command == "SHOW CONFIG") {
+        }
+        else if (command == "SHOW CONFIG")
+        {
             Serial.println("Current Configuration:");
             Serial.println("Server URL: " + server_url);
             Serial.println("WiFi SSID: " + SSID);
             Serial.println("WiFi Password: " + PASS);
             Serial.println("Flow Rate: " + String(FLOWRATE));
-        } 
-        else if(command=="CHK"){
+        }
+        else if (command == "CHK")
+        {
             ota.checkForUpdates();
         }
-        else {
+        else
+        {
             Serial.println("Invalid command. Use: \nSET URL <value> \nSET SSID <value> \nSET PASS <value> \nSET FLOW <value> \nSHOW CONFIG");
         }
     }
@@ -493,15 +450,21 @@ void updateDisplayUI()
     display.print(WiFi.status() == WL_CONNECTED ? WiFi.localIP().toString().c_str() : "Disconnected");
     display.display();
 }
-void playloader(int loops){
-for (int i = 0; i < loops; i++) {
-    for (int frame = 0; frame < FRAME_COUNT; frame++) {
-      display.clearDisplay();
-      display.drawBitmap(32, 0, frames[frame], FRAME_WIDTH, FRAME_HEIGHT, 1);
-      display.display();
-      delay(FRAME_DELAY);
+void playloader(int loops)
+{
+    for (int i = 0; i < loops; i++)
+    {
+        for (int frame = 0; frame < FRAME_COUNT; frame++)
+        {
+            display.clearDisplay();
+            display.drawBitmap(32, 0, frames[frame], FRAME_WIDTH, FRAME_HEIGHT, 1);
+            display.display();
+            delay(FRAME_DELAY);
+        }
+
     }
-  }
+    delay(100);
+    display.clearDisplay();
 }
 void setup()
 {
@@ -525,9 +488,8 @@ void setup()
         Serial.println("SPIFFS initialization failed! Restarting ESP32...");
         ESP.restart();
     }
-    // playloader(2);
+    playloader(5);
     // playAnimation();
-    bootAnimation();
     Serial.println("Connecting to WiFi...");
     WiFi.begin(SSID, PASS);
 
@@ -616,7 +578,8 @@ void loop()
         updateDisplayUI();
     }
     handleSerial();
-    if(millis()-lastDISUpdate>=(1000*60*60)){
+    if (millis() - lastDISUpdate >= (1000 * 60 * 60))
+    {
         ESP.restart();
     }
 }
