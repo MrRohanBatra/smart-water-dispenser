@@ -364,9 +364,10 @@ for (int i = 0; i < loops; i++) {
 }
 void setup()
 {
+    display.invertDisplay(true);
     Wire.begin(16, 4);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(7, 0, 1);
+    ota.setFirmwareVersion(7, 0, 2);
     Serial.begin(115200);
     // bt.begin(115200);
     pinMode(27, OUTPUT);
