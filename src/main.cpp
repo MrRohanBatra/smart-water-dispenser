@@ -364,7 +364,7 @@ for (int i = 0; i < loops; i++) {
 }
 void setup()
 {
-    Wire.begin(16, 15);
+    Wire.begin(16, 4);
     ota.setupdisplay(display);
     ota.setFirmwareVersion(7, 0, 1);
     Serial.begin(115200);
