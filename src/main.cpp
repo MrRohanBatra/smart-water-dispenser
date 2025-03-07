@@ -485,6 +485,7 @@ void updateDisplayUI()
 }
 void playloader(int loops)
 {
+    setupTime();
     for (int i = 0; i < loops; i++)
     {
         for (int frame = 0; frame < FRAME_COUNT; frame++)
@@ -568,7 +569,7 @@ void setup()
     ledcAttachPin(EN, 0);
     Serial.println("Setup complete.");
     playloader(5);
-    setupTime();
+    
     updateDisplayUI();
 }
 unsigned long long int lastcheckedforupdate = millis();
