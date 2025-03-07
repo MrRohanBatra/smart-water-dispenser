@@ -594,13 +594,17 @@ void loop()
     if (millis() - lastTouchCheck > 300)
     {
         lastTouchCheck = millis();
-        if (touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD)
+        if (touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing==false)
         {
             Serial.print(touchRead(TOUCH_PIN));
             Serial.println("Touch detected, dispensing...");
             device.sendPowerStateEvent(true, "Touch triggered");
             startDispense(100);
         }
+    }
+    if(touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing==true){
+        stopDispense();
+        Serial.println("Stopping Dispensing");
     }
     if (millis() - lastcheckedforupdate >= (1000 * 60 * 10))
     {
