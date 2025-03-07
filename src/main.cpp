@@ -574,6 +574,58 @@ void setup()
 unsigned long long int lastcheckedforupdate = millis();
 static unsigned long lastUIUpdate = 0;
 static unsigned long lastDISUpdate = 0;
+// void loop()
+// {
+//     SinricPro.handle();
+//     server.handleClient();
+//     if (WiFi.status() != WL_CONNECTED)
+//     {
+//         reconnectWiFi();
+//     }
+
+//     if (dispensing && (millis() - dispenseStartTime >= dispenseDuration))
+//     {
+//         stopDispense();
+//     }
+
+//     static unsigned long lastTouchCheck = 0;
+//     if (millis() - lastTouchCheck > 300)
+//     {
+//         int read=touchRead(TOUCH_PIN);
+//         lastTouchCheck = millis();
+//         if (read <= TOUCH_THRESHOLD )
+//         {
+//             if(dispensing == false){
+//             Serial.print(touchRead(TOUCH_PIN));
+//             Serial.println("Touch detected, dispensing...");
+//             device.sendPowerStateEvent(true, "Touch triggered");
+//             startDispense(100);
+//         }
+//         if(dispensing==true){
+//             Serial.println("Touch detected again, stop dispensing...");
+//             device.sendPowerStateEvent(false, "Touch triggered again");
+//             // startDispense(100);
+//             stopDispense();
+//         }
+//     }
+
+//     }
+//     if (millis() - lastcheckedforupdate >= (1000 * 60 * 10))
+//     {
+//         ota.checkForUpdates();
+//         lastcheckedforupdate = millis();
+//     }
+//     if (millis() - lastUIUpdate > 100)
+//     {
+//         lastUIUpdate = millis();
+//         updateDisplayUI();
+//     }
+//     handleSerial();
+//     if (millis() - lastDISUpdate >= (1000 * 60 * 60))
+//     {
+//         ESP.restart();
+//     }
+// }
 void loop()
 {
     SinricPro.handle();
@@ -591,25 +643,26 @@ void loop()
     static unsigned long lastTouchCheck = 0;
     if (millis() - lastTouchCheck > 300)
     {
-        int read=touchRead(TOUCH_PIN);
         lastTouchCheck = millis();
-        if (read <= TOUCH_THRESHOLD )
+        int touchValue = touchRead(TOUCH_PIN); // Read touch sensor once to avoid duplicate reads
+
+        if (touchValue <= TOUCH_THRESHOLD)
         {
-            if(dispensing == false){
-            Serial.print(touchRead(TOUCH_PIN));
-            Serial.println("Touch detected, dispensing...");
-            device.sendPowerStateEvent(true, "Touch triggered");
-            startDispense(100);
-        }
-        if(dispensing==true){
-            Serial.println("Touch detected again, stop dispensing...");
-            device.sendPowerStateEvent(false, "Touch triggered again");
-            // startDispense(100);
-            stopDispense();
+            if (!dispensing)
+            {
+                Serial.print(touchValue);
+                Serial.println(" Touch detected, dispensing...");
+                device.sendPowerStateEvent(true, "Touch triggered");
+                startDispense(100);
+            }
+            else
+            {
+                Serial.println(" Touch detected again, stopping...");
+                stopDispense();
+            }
         }
     }
 
-    }
     if (millis() - lastcheckedforupdate >= (1000 * 60 * 10))
     {
         ota.checkForUpdates();
