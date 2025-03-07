@@ -574,7 +574,6 @@ void setup()
 unsigned long long int lastcheckedforupdate = millis();
 static unsigned long lastUIUpdate = 0;
 static unsigned long lastDISUpdate = 0;
-
 void loop()
 {
     SinricPro.handle();
@@ -592,22 +591,24 @@ void loop()
     static unsigned long lastTouchCheck = 0;
     if (millis() - lastTouchCheck > 300)
     {
+        int read=touchRead(TOUCH_PIN);
         lastTouchCheck = millis();
-        if (touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing == false)
+        if (read <= TOUCH_THRESHOLD )
         {
+            if(dispensing == false){
             Serial.print(touchRead(TOUCH_PIN));
             Serial.println("Touch detected, dispensing...");
             device.sendPowerStateEvent(true, "Touch triggered");
             startDispense(100);
         }
-    }
-    if (millis() - lastTouchCheck > 300)
-    {
-        if (touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing == true)
-        {
+        if(dispensing==true){
+            Serial.println("Touch detected again, stop dispensing...");
+            device.sendPowerStateEvent(false, "Touch triggered again");
+            // startDispense(100);
             stopDispense();
-            Serial.println("Stopping Dispensing");
         }
+    }
+
     }
     if (millis() - lastcheckedforupdate >= (1000 * 60 * 10))
     {
