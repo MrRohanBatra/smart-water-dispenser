@@ -506,7 +506,7 @@ void setup()
     // display.display();
     Wire.begin(16, 4);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(7, 1, 0);
+    ota.setFirmwareVersion(7, 1, 1);
     Serial.begin(115200);
     // bt.begin(115200);
     pinMode(27, OUTPUT);
