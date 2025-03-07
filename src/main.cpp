@@ -193,6 +193,39 @@ void displayLog(const String &message)
     display.println(message);
     display.display();
 }
+const unsigned char water_drop_bitmap[] PROGMEM = {
+    0b00000000, 0b10000000,
+    0b00000001, 0b11000000,
+    0b00000011, 0b11100000,
+    0b00000011, 0b11100000,
+    0b00000111, 0b11110000,
+    0b00000111, 0b11110000,
+    0b00001111, 0b11111000,
+    0b00001111, 0b11111000,
+    0b00001111, 0b11111000,
+    0b00001111, 0b11111000,
+    0b00001111, 0b11111000,
+    0b00000111, 0b11110000,
+    0b00000111, 0b11110000,
+    0b00000011, 0b11100000,
+    0b00000001, 0b11000000,
+    0b00000000, 0b10000000
+  };
+  
+void logo(){
+    display.clearDisplay();
+
+    // Display "Smart"
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(10, 20);
+    display.print("Smart");
+  
+    // Draw 💧 (water drop) next to "Smart"
+    display.drawBitmap(85, 22, water_drop_bitmap, 16, 16, SSD1306_WHITE);
+  
+    display.display();
+}
 void handleSerial()
 {
     if (Serial.available())
@@ -472,7 +505,7 @@ void setup()
     // display.display();
     Wire.begin(16, 4);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(7, 0, 4);
+    ota.setFirmwareVersion(7, 1, 0);
     Serial.begin(115200);
     // bt.begin(115200);
     pinMode(27, OUTPUT);
@@ -482,13 +515,13 @@ void setup()
         Serial.println("SSD1306 initialization failed!");
         ESP.restart();
     }
-
+    logo();
     if (!SPIFFS.begin(true))
     {
         Serial.println("SPIFFS initialization failed! Restarting ESP32...");
         ESP.restart();
     }
-    playloader(5);
+    
     // playAnimation();
     Serial.println("Connecting to WiFi...");
     WiFi.begin(SSID, PASS);
@@ -534,6 +567,7 @@ void setup()
     ledcSetup(0, 1000, 8);
     ledcAttachPin(EN, 0);
     Serial.println("Setup complete.");
+    playloader(5);
     setupTime();
     updateDisplayUI();
 }
