@@ -209,10 +209,10 @@ const unsigned char water_drop_bitmap[] PROGMEM = {
     0b00000111, 0b11110000,
     0b00000011, 0b11100000,
     0b00000001, 0b11000000,
-    0b00000000, 0b10000000
-  };
-  
-void logo(){
+    0b00000000, 0b10000000};
+
+void logo()
+{
     display.clearDisplay();
 
     // Display "Smart"
@@ -220,10 +220,10 @@ void logo(){
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(10, 20);
     display.print("Smart");
-  
+
     // Draw 💧 (water drop) next to "Smart"
     display.drawBitmap(85, 22, water_drop_bitmap, 16, 16, SSD1306_WHITE);
-  
+
     display.display();
 }
 void handleSerial()
@@ -495,7 +495,6 @@ void playloader(int loops)
             display.display();
             delay(FRAME_DELAY);
         }
-
     }
     delay(100);
     display.clearDisplay();
@@ -522,7 +521,7 @@ void setup()
         Serial.println("SPIFFS initialization failed! Restarting ESP32...");
         ESP.restart();
     }
-    
+
     // playAnimation();
     Serial.println("Connecting to WiFi...");
     WiFi.begin(SSID, PASS);
@@ -569,7 +568,7 @@ void setup()
     ledcAttachPin(EN, 0);
     Serial.println("Setup complete.");
     playloader(5);
-    
+
     updateDisplayUI();
 }
 unsigned long long int lastcheckedforupdate = millis();
@@ -594,7 +593,7 @@ void loop()
     if (millis() - lastTouchCheck > 300)
     {
         lastTouchCheck = millis();
-        if (touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing==false)
+        if (touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing == false)
         {
             Serial.print(touchRead(TOUCH_PIN));
             Serial.println("Touch detected, dispensing...");
@@ -602,9 +601,13 @@ void loop()
             startDispense(100);
         }
     }
-    if(touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing==true){
-        stopDispense();
-        Serial.println("Stopping Dispensing");
+    if (millis() - lastTouchCheck > 300)
+    {
+        if (touchRead(TOUCH_PIN) <= TOUCH_THRESHOLD && dispensing == true)
+        {
+            stopDispense();
+            Serial.println("Stopping Dispensing");
+        }
     }
     if (millis() - lastcheckedforupdate >= (1000 * 60 * 10))
     {
