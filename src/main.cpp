@@ -64,7 +64,7 @@ const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 19800;
 const int daylightOffset_sec = 0;
 int dispenseml;
-void settleLetters();
+// void settleLetters();
 void setupTime()
 {
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
@@ -91,87 +91,87 @@ String getCurrentTime()
     return String(timeStr);
 }
 
-struct Letter
-{
-    char letter;
-    int x, y;
-    int dx, dy;
-};
+// struct Letter
+// {
+//     char letter;
+//     int x, y;
+//     int dx, dy;
+// };
 
-Letter letters[] = {
-    {'A', 10, 20, 2, 2},
-    {'-', 40, 30, -2, 1},
-    {'2', 70, 10, 1, -2},
-    {'0', 100, 40, -1, -1},
-    {'4', 55, 25, 1, -1}};
+// Letter letters[] = {
+//     {'A', 10, 20, 2, 2},
+//     {'-', 40, 30, -2, 1},
+//     {'2', 70, 10, 1, -2},
+//     {'0', 100, 40, -1, -1},
+//     {'4', 55, 25, 1, -1}};
 
-int numLetters = sizeof(letters) / sizeof(letters[0]);
+// int numLetters = sizeof(letters) / sizeof(letters[0]);
 
-void playAnimation()
-{
-    bool settled = false;
-    int frameCount = 0;
+// void playAnimation()
+// {
+//     bool settled = false;
+//     int frameCount = 0;
 
-    while (!settled)
-    {
-        display.clearDisplay();
+//     while (!settled)
+//     {
+//         display.clearDisplay();
 
-        for (int i = 0; i < numLetters; i++)
-        {
-            letters[i].x += letters[i].dx;
-            letters[i].y += letters[i].dy;
+//         for (int i = 0; i < numLetters; i++)
+//         {
+//             letters[i].x += letters[i].dx;
+//             letters[i].y += letters[i].dy;
 
-            if (letters[i].x < 0 || letters[i].x > SCREEN_WIDTH - 10)
-                letters[i].dx *= -1;
-            if (letters[i].y < 0 || letters[i].y > SCREEN_HEIGHT - 10)
-                letters[i].dy *= -1;
-        }
+//             if (letters[i].x < 0 || letters[i].x > SCREEN_WIDTH - 10)
+//                 letters[i].dx *= -1;
+//             if (letters[i].y < 0 || letters[i].y > SCREEN_HEIGHT - 10)
+//                 letters[i].dy *= -1;
+//         }
 
-        for (int i = 0; i < numLetters; i++)
-        {
-            display.setTextSize(2);
-            display.setTextColor(SSD1306_WHITE);
-            display.setCursor(letters[i].x, letters[i].y);
-            display.print(letters[i].letter);
-        }
+//         for (int i = 0; i < numLetters; i++)
+//         {
+//             display.setTextSize(2);
+//             display.setTextColor(SSD1306_WHITE);
+//             display.setCursor(letters[i].x, letters[i].y);
+//             display.print(letters[i].letter);
+//         }
 
-        display.display();
-        delay(100);
+//         display.display();
+//         delay(100);
 
-        frameCount++;
-        if (frameCount > 100)
-        {
-            settled = true;
-        }
-    }
+//         frameCount++;
+//         if (frameCount > 100)
+//         {
+//             settled = true;
+//         }
+//     }
 
-    settleLetters();
-}
+//     settleLetters();
+// }
 
-void settleLetters()
-{
-    letters[0] = {'A', 10, 20, 0, 0};
-    letters[1] = {'-', 40, 20, 0, 0};
-    letters[2] = {'2', 70, 20, 0, 0};
-    letters[3] = {'0', 100, 20, 0, 0};
-    letters[4] = {'4', 55, 20, 0, 0};
+// void settleLetters()
+// {
+//     letters[0] = {'A', 10, 20, 0, 0};
+//     letters[1] = {'-', 40, 20, 0, 0};
+//     letters[2] = {'2', 70, 20, 0, 0};
+//     letters[3] = {'0', 100, 20, 0, 0};
+//     letters[4] = {'4', 55, 20, 0, 0};
 
-    display.clearDisplay();
-    for (int i = 0; i < numLetters; i++)
-    {
-        display.setTextSize(2);
-        display.setTextColor(SSD1306_WHITE);
-        display.setCursor(letters[i].x, letters[i].y);
-        display.print(letters[i].letter);
-    }
+//     display.clearDisplay();
+//     for (int i = 0; i < numLetters; i++)
+//     {
+//         display.setTextSize(2);
+//         display.setTextColor(SSD1306_WHITE);
+//         display.setCursor(letters[i].x, letters[i].y);
+//         display.print(letters[i].letter);
+//     }
 
-    // Display "VPRD" below
-    display.setTextSize(1);
-    display.setCursor(50, 50);
-    display.print("VPRD");
+//     // Display "VPRD" below
+//     display.setTextSize(1);
+//     display.setCursor(50, 50);
+//     display.print("VPRD");
 
-    display.display();
-}
+//     display.display();
+// }
 
 float FLOWRATE = 27.608;
 bool deviceState = false;
@@ -496,7 +496,7 @@ void playloader(int loops)
             delay(FRAME_DELAY);
         }
     }
-    delay(100);
+    // delay(100);
     display.clearDisplay();
 }
 void setup()
@@ -505,7 +505,7 @@ void setup()
     // display.display();
     Wire.begin(16, 4);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(7, 1, 1);
+    ota.setFirmwareVersion(7, 1, 4);
     Serial.begin(115200);
     // bt.begin(115200);
     pinMode(27, OUTPUT);
@@ -551,6 +551,9 @@ void setup()
     server.on("/", HTTP_GET, handleRoot);
     server.on("/dispense", HTTP_POST, handleDispense);
     server.on("/state", HTTP_GET, handleState);
+    server.on("/check",HTTP_POST,[](){
+        ota.checkForUpdates();
+    });
     ota.setupManualOTA(server);
     server.begin();
 
@@ -654,11 +657,6 @@ void loop()
                 Serial.println(" Touch detected, dispensing...");
                 device.sendPowerStateEvent(true, "Touch triggered");
                 startDispense(100);
-            }
-            else
-            {
-                Serial.println(" Touch detected again, stopping...");
-                stopDispense();
             }
         }
     }
