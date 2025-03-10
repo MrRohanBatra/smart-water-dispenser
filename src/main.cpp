@@ -356,7 +356,7 @@ bool onPowerState(const String &deviceId, bool &state)
 
     if (state)
     {
-        startDispense(100);
+        startDispense(180);
     }
 
     return true;
@@ -505,7 +505,7 @@ void setup()
     // display.display();
     Wire.begin(16, 4);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(7, 1, 4);
+    ota.setFirmwareVersion(7,2,2);
     Serial.begin(115200);
     // bt.begin(115200);
     pinMode(27, OUTPUT);
@@ -551,7 +551,8 @@ void setup()
     server.on("/", HTTP_GET, handleRoot);
     server.on("/dispense", HTTP_POST, handleDispense);
     server.on("/state", HTTP_GET, handleState);
-    server.on("/check",HTTP_POST,[](){
+    server.on("/check",HTTP_GET,[](){
+        server.send(200,"text/html","<h1 align='center'>CHECKING FOR UPDATES</h1>");
         ota.checkForUpdates();
     });
     ota.setupManualOTA(server);
@@ -656,7 +657,7 @@ void loop()
                 Serial.print(touchValue);
                 Serial.println(" Touch detected, dispensing...");
                 device.sendPowerStateEvent(true, "Touch triggered");
-                startDispense(100);
+                startDispense(180i);
             }
         }
     }
