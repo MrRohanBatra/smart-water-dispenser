@@ -87,7 +87,7 @@ String getCurrentTime()
         return "Err";
     }
     char timeStr[16];
-    strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+    strftime(timeStr, sizeof(timeStr), "%I:%M %p", &timeinfo);
     return String(timeStr);
 }
 
