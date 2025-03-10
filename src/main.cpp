@@ -657,7 +657,7 @@ void loop()
                 Serial.print(touchValue);
                 Serial.println(" Touch detected, dispensing...");
                 device.sendPowerStateEvent(true, "Touch triggered");
-                startDispense(180i);
+                startDispense(180);
             }
         }
     }
