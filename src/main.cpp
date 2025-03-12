@@ -21,7 +21,7 @@
 #define IN2 14
 #define LED_PIN 2
 #define TOUCH_PIN 32
-#define DHT_PIN 4
+#define DHT_PIN 19
 #define DHT_TYPE DHT11
 #define TOUCH_THRESHOLD 30
 #define SCREEN_WIDTH 128
@@ -392,7 +392,7 @@ void setup()
     display.setRotation(2);
     Wire.begin(16, 4);
     ota.setupdisplay(display);
-    ota.setFirmwareVersion(7,3,0);
+    ota.setFirmwareVersion(7,3,2);
     Serial.begin(115200);
     pinMode(27, OUTPUT);
     digitalWrite(27, LOW);

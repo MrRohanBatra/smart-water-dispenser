@@ -154,7 +154,6 @@
           ? "☀️"
           : "🌙";
 
-        // Enter fullscreen mode only when toggling dark mode
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch((err) => {
             console.error("Fullscreen error:", err);
@@ -191,7 +190,7 @@
           let progress = document.getElementById("progress");
           progress.style.width = "0%";
 
-          let flowRate = 11.05 * 2.5; // ms per mL
+          let flowRate = 11.05 * 2.5;
           let totalTime = volume * flowRate;
           let steps = Math.ceil(totalTime / 100);
           let stepSize = 100 / steps;
@@ -254,16 +253,17 @@
 
       async function updateWeather() {
         try {
-          let response = await fetch("https://wttr.in/?format=%C+%t+%w");
-          let text = await response.text();
-          document.getElementById("weather").innerHTML = `Weather: ${text}`;
+          let response = await fetch("/dht11");
+          let data = await response.json();
+          document.getElementById(
+            "weather"
+          ).innerHTML = `Weather: ${data.temp}°C | ${data.humid}%`;
         } catch (error) {
           document.getElementById("weather").textContent =
             "Weather unavailable";
           console.error("Error fetching weather:", error);
         }
       }
-
       setInterval(updateStatus, 2000);
       setInterval(updateTime, 1000);
       setInterval(updateWeather, 60000);
